@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Отслеживание посылок Track24</title>
+    <style>
+        /* ... (styles from previous example) ... */
+    </style>
+</head>
+<body>
+
+    <h1>Отслеживание посылок Track24</h1>
+
+    <form id="tracking-form">
+        <input type="text" id="tracking-number" placeholder="Введите трек-номер">
+        <button type="submit" id="track-button">Отследить</button>
+    </form>
+
+    <div id="tracking-results"></div>
+
+    <script>
+        const form = document.getElementById('tracking-form');
+        const trackingNumberInput = document.getElementById('tracking-number');
+        const trackingResultsDiv = document.getElementById('tracking-results');
+        const apiKey = 'a2276a975a42e45fefe82e874c66493b'; // Ваш API ключ
+
+
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const trackingNumber = trackingNumberInput.value;
+            const apiUrl = `https://api.track24.ru/tracking.json.php?apiKey=${apiKey}&code=${trackingNumber}`;
+
+
+            try {
+                const response = await fetch(apiUrl);
+                const data = await response.json();
+
+                trackingResultsDiv.innerHTML = '';
+
+                if (data && data.status === '200') {
+                    if(data.data && data.data.length > 0){
+                        const trackData = data.data[0]; // Берем данные по первому треку (если их несколько)
+                        if (trackData.events && trackData.events.length > 0) {
+                            trackData.events.forEach(event => {
+                                const eventDiv = document.createElement('div');
+                                eventDiv.innerHTML = `<strong>${event.operationDateTime}</strong> - ${event.operationPlaceName ? event.operationPlaceName : ""} - ${event.operationAttribute}`;
+                                trackingResultsDiv.appendChild(eventDiv);
+                            });
+                        } else {
+                            trackingResultsDiv.textContent = "События по трек-номеру не найдены.";
+                        }
+
+                    } else {
+                        trackingResultsDiv.textContent = "Информация по трек-номеру не найдена.";
+                    }
+                } else if (data && data.status) {
+                    trackingResultsDiv.textContent = `Ошибка: ${data.status} - ${data.message || "Неизвестная ошибка"}`;
+                } else {
+                  trackingResultsDiv.textContent = "Произошла ошибка при отслеживании.";
+                }
+
+            } catch (error) {
+                console.error("Ошибка:", error);
+                trackingResultsDiv.textContent = "Произошла ошибка при отслеживании.";
+            }
+        });
+    </script>
+
+</body>
+  </html>
