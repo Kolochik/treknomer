@@ -3,94 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Отслеживание посылок Track24</title>
+    <title>Отслеживание посылок</title>
     <style>
         body {
-            font-family: sans-serif;
+            font-family: Arial, sans-serif;
+            margin: 20px;
         }
-        #tracking-form {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        #tracking-number {
-            flex-grow: 1;
-            padding: 8px;
-            border: 1px solid #ccc;
-        }
-        #track-button {
-            padding: 8px 16px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-        #tracking-results {
+        #result {
+            margin-top: 20px;
             border: 1px solid #ccc;
             padding: 10px;
+            white-space: pre-wrap; /* Сохраняет форматирование текста */
         }
     </style>
-</head>
-<body>
-
-    <h1>Отслеживание посылок Track24</h1>
-
-    <form id="tracking-form">
-        <input type="text" id="tracking-number" placeholder="Введите трек-номер">
-        <button type="submit" id="track-button">Отследить</button>
-    </form>
-
-    <div id="tracking-results"></div>
-
     <script>
-        const form = document.getElementById('tracking-form');
-        const trackingNumberInput = document.getElementById('tracking-number');
-        const trackingResultsDiv = document.getElementById('tracking-results');
-        const apiKey = 'a2276a975a42e45fefe82e874c66493b'; // Ваш API ключ
-        const domain = 'kolochik.github.io'; // Ваш домен GitHub Pages
-
-        form.addEventListener('submit', async (event) => {
-            event.preventDefault();
-
-            const trackingNumber = trackingNumberInput.value;
-            // URL для вашего backend-сервиса (если используется)
-            // const apiUrl = `/your-backend-route?trackingNumber=${trackingNumber}`;
-            const apiUrl = `https://api.track24.ru/tracking.json.php?apiKey=${apiKey}&domain=${domain}&code=${trackingNumber}`; // API Track24
-
+        async function trackPackage() {
+            const trackingNumber = document.getElementById('trackingNumber').value;
+            const apiKey = 'a2276a975a42e45fefe82e874c66493b'; // Ваш API ключ
+            const domain = 'kolochik.github.io'; // Укажите ваш домен
+            const apiUrl = `https://api.track24.ru/tracking.json.php?apiKey=${apiKey}&domain=${domain}&code=${trackingNumber}&pretty=true`;
 
             try {
-                const response = await fetch(apiUrl);
-                const data = await response.json();
-
-                trackingResultsDiv.innerHTML = '';
-
-                if (data && data.status === '200') {
-                    if(data.data && data.data.length > 0){
-                      const trackData = data.data[0];
-                      if (trackData.events && trackData.events.length > 0) {
-                            trackData.events.forEach(event => {
-                                const eventDiv = document.createElement('div');
-                                eventDiv.innerHTML = `<strong>${event.operationDateTime}</strong> - ${event.operationPlaceName || ""} - ${event.operationAttribute}`;
-                                trackingResultsDiv.appendChild(eventDiv);
-                            });
-                        } else {
-                            trackingResultsDiv.textContent = "События по трек-номеру не найдены.";
-                        }
-                    } else {
-                        trackingResultsDiv.textContent = "Информация по трек-номеру не найдена.";
+                const response = await fetch(apiUrl, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
                     }
-                } else if (data && data.status) {
-                     trackingResultsDiv.textContent = `Ошибка: ${data.status} - ${data.message || "Неизвестная ошибка"}`;
-                } else {
-                    trackingResultsDiv.textContent = "Произошла ошибка при отслеживании.";
+                });
+
+                if (!response.ok) {
+                    throw new Error('Ошибка сети: ' + response.status);
                 }
 
-            } catch (error) {
-                console.error("Ошибка:", error);
-                trackingResultsDiv.textContent = "Произошла ошибка при отслеживании.";
-            }
-        });
-    </script>
+                const data = await response.json();
 
+                // Проверяем статус ответа API
+                if (data.status === 'ok') {
+                    // Отображаем информацию о посылке
+                    document.getElementById('result').innerText = JSON.stringify(data.data, null, 2);
+                } else {
+                    // Если произошла ошибка, выводим сообщение
+                    document.getElementById('result').innerText = 'Ошибка: ' + data.message;
+                }
+            } catch (error) {
+                document.getElementById('result').innerText = 'Ошибка: ' + error.message;
+            }
+        }
+    </script>
+</head>
+<body>
+    <h1>Отслеживание посылок</h1>
+    <input type="text" id="trackingNumber" placeholder="Введите номер отслеживания" />
+    <button onclick="trackPackage()">Отследить</button>
+    <div id="result"></div>
 </body>
 </html>
