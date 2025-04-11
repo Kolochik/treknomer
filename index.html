@@ -18,8 +18,8 @@
     </style>
     <script>
         async function trackPackage() {
-            const trackingId = document.getElementById('trackingId').value; // Получаем ID отслеживания
-            const apiUrl = `https://postal-ninja.p.rapidapi.com/v1/track/${trackingId}/move`; // Формируем URL
+            const trackingNumber = document.getElementById('trackingNumber').value; // Получаем трек-номер
+            const apiUrl = `https://postal-ninja.p.rapidapi.com/v1/track/${trackingNumber}/move`; // Формируем URL
 
             try {
                 const response = await fetch(apiUrl, {
@@ -31,12 +31,13 @@
                         'x-rapidapi-key': 'b3b3c26cc5msh36c98f4f818d472p1fb68ajsnac83c82424ac' // Ваш RapidAPI ключ
                     },
                     body: new URLSearchParams({
-                        'to': 'ARCHIVED' // Передаем данные
+                        'to': 'ARCHIVED' // Передаем данные, если это необходимо
                     })
                 });
 
                 if (!response.ok) {
-                    throw new Error('Ошибка сети: ' + response.status);
+                    const errorData = await response.json(); // Получаем тело ответа с ошибкой
+                    throw new Error(`Ошибка ${response.status}: ${errorData.message || 'Неизвестная ошибка'}`);
                 }
 
                 const data = await response.json();
@@ -57,7 +58,7 @@
 </head>
 <body>
     <h1>Отслеживание посылок</h1>
-    <input type="text" id="trackingId" placeholder="Введите ID отслеживания" />
+    <input type="text" id="trackingNumber" placeholder="Введите трек-номер" />
     <button onclick="trackPackage()">Отследить</button>
     <div id="result"></div>
 </body>
