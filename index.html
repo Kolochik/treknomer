@@ -1,5 +1,64 @@
-<iframe
-	title="Виджет отслеживания посылок"
-	src="https://postal.ninja/widget/tracker?tc=URA04554051ZPRU&noSave=true"
-	style="width: 100%; height: 300px;"
-	frameborder
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Отслеживание посылок</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        #result {
+            margin-top: 20px;
+            border: 1px solid #ccc;
+            padding: 10px;
+            white-space: pre-wrap; /* Сохраняет форматирование текста */
+        }
+    </style>
+    <script>
+        async function trackPackage() {
+            const trackingId = document.getElementById('trackingId').value; // Получаем ID отслеживания
+            const apiUrl = `https://postal-ninja.p.rapidapi.com/v1/track/${trackingId}/move`; // Формируем URL
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json; charset=UTF-8',
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'x-rapidapi-host': 'postal-ninja.p.rapidapi.com',
+                        'x-rapidapi-key': 'b3b3c26cc5msh36c98f4f818d472p1fb68ajsnac83c82424ac' // Ваш RapidAPI ключ
+                    },
+                    body: new URLSearchParams({
+                        'to': 'ARCHIVED' // Передаем данные
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Ошибка сети: ' + response.status);
+                }
+
+                const data = await response.json();
+
+                // Проверяем статус ответа API
+                if (data.status === 'ok') {
+                    // Отображаем информацию о посылке
+                    document.getElementById('result').innerText = JSON.stringify(data.data, null, 2);
+                } else {
+                    // Если произошла ошибка, выводим сообщение
+                    document.getElementById('result').innerText = 'Ошибка: ' + data.message;
+                }
+            } catch (error) {
+                document.getElementById('result').innerText = 'Ошибка: ' + error.message;
+            }
+        }
+    </script>
+</head>
+<body>
+    <h1>Отслеживание посылок</h1>
+    <input type="text" id="trackingId" placeholder="Введите ID отслеживания" />
+    <button onclick="trackPackage()">Отследить</button>
+    <div id="result"></div>
+</body>
+</html>
