@@ -1,1 +1,71 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Elegant Hello World</title>
+  <style>
+    /* Импортируем экзотический шрифт */
+    @import url('https://fonts.googleapis.com/css2?family=Pacifico&display=swap');
+    
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: Arial, sans-serif;
+      overflow: hidden;
+    }
+    
+    body {
+      /* Градиентный фон */
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    h1 {
+      font-size: 4rem;
+      font-family: 'Pacifico', cursive;
+      color: #fff;
+      text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
+      opacity: 0;
+      animation: fadeIn 2s forwards, float 3s ease-in-out infinite;
+    }
+    
+    @keyframes fadeIn {
+      to { opacity: 1; }
+    }
+    
+    @keyframes float {
+      0% { transform: translateY(0); }
+      50% { transform: translateY(-20px); }
+      100% { transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <h1 id="message">Hello, world!</h1>
 
+  <script>
+    // Добавляем эффект «искрящихся» частиц при клике
+    document.addEventListener('click', function(e) {
+      let sparkle = document.createElement('div');
+      sparkle.style.position = 'absolute';
+      sparkle.style.width = '10px';
+      sparkle.style.height = '10px';
+      sparkle.style.background = 'rgba(255,255,255,0.8)';
+      sparkle.style.borderRadius = '50%';
+      sparkle.style.top = e.pageY + 'px';
+      sparkle.style.left = e.pageX + 'px';
+      sparkle.style.pointerEvents = 'none';
+      document.body.appendChild(sparkle);
+      sparkle.animate([
+        { transform: 'scale(1)', opacity: 1 },
+        { transform: 'scale(3)', opacity: 0 }
+      ], { duration: 800 });
+      setTimeout(() => { sparkle.remove(); }, 800);
+    });
+  </script>
+</body>
+</html>
